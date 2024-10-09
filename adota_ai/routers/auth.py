@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from adota_ai.routers.users import fake_db
 
 router = APIRouter()
 
@@ -9,6 +10,9 @@ class LoginRequest(BaseModel):
 
 @router.post("/login")
 async def login(request: LoginRequest):
-    if request.email == "test@example.com" and request.password == "password123":
+    user = next((u for u in fake_db if u["email"] == request.email), None)
+
+    if user and user["password"] == request.password:
         return {"message": "Login realizado com sucesso"}
-    raise HTTPException(status_code=400, detail="Credenciais inválidas")
+    
+    raise HTTPException(status_code=400, detail="Login falhou. Verifique suas credenciais.")
